@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { Panel } from "@/components/panel";
 import { getAgentRunsPageData, getComparePageData } from "@/lib/data/queries";
-import { assertOpsSecret } from "@/lib/ops";
+import { assertOpsSecret, assertOpsSession } from "@/lib/ops";
 import { formatDate } from "@/lib/utils";
 import { ingestAction, recomputeAction, addDataSourceAction, addMetricSnapshotAction } from "@/app/ops-console/actions";
 
@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function OpsConsolePage({ params }: { params: { secret: string } }) {
   try {
     assertOpsSecret(params.secret);
+    assertOpsSession();
   } catch {
     notFound();
   }

@@ -51,6 +51,12 @@ docker compose up -d --build caddy
 /ops-console-roma-onto-secret
 ```
 
+首次访问需要同时带管理 key，访问成功后会写入 HttpOnly cookie：
+
+```text
+/ops-console-roma-onto-secret?key=your-ops-access-key
+```
+
 生产前务必改：
 
 - `OPS_CONSOLE_SECRET`
