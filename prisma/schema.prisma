@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CompanyType {
+  PRIMARY
+  GLOBAL_PEER
+  DOMESTIC_PEER
+}
+
+enum EventType {
+  COMPANY_UPDATE
+  POLICY
+  INDUSTRY_PRICING
+  CAPEX
+  TECHNOLOGY
+  CUSTOMER
+  MARKET_CYCLE
+  AGENT_DISCOVERY
+}
+
+enum ImpactDirection {
+  POSITIVE
+  NEGATIVE
+  MIXED
+  NEUTRAL
+}
+
+enum ConfidenceLevel {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum ValuationModel {
+  BUFFETT_QUALITY_DCF
+  GROWTH_PS_PEG
+}
+
+enum AgentRunStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum EntityType {
+  COMPANY
+  BUSINESS_LINE
+  PRODUCT
+  TECHNOLOGY_NODE
+  CAPACITY
+  FAB
+  CUSTOMER_SEGMENT
+  SUPPLIER
+  CAPEX_PROGRAM
+  POLICY_CONSTRAINT
+  MARKET_CYCLE
+}
+
+model Company {
+  id               String            @id @default(cuid())
+  slug             String            @unique
+  name             String
+  englishName      String
+  ticker           String?
+  market           String?
+  description      String
+  companyType      CompanyType
+  region           String
+  sector           String
+  summary          String
+  investmentThesis String
+  moatSummary      String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  businessLines    BusinessLine[]
+  products         Product[]
+  technologyNodes  TechnologyNode[]
+  capacities       Capacity[]
+  fabs             FabOrProductionLine[]
+  customerSegments CustomerSegment[]
+  suppliers        Supplier[]
+  capexPrograms    CapexProgram[]
+  policyConstraints PolicyConstraint[]
+  metricSnapshots  MetricSnapshot[]
+  dataSources      DataSource[]
+  events           Event[]
+  eventTargets     EventTarget[]
+  relationships    Relationship[]
+  valuationRuns    ValuationRun[]
+  agentRuns        AgentRun[]
+  agentChanges     AgentChange[]
+}
+
+model BusinessLine {
+  id            String   @id @default(cuid())
+  companyId     String
+  name          String
+  summary       String
+  revenueWeight Float?
+  marginProfile String?
+  growthProfile String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id                 String   @id @default(cuid())
+  companyId          String
+  businessLine       String?
+  name               String
+  summary            String
+  nodeLabel          String?
+  lifecycleStage     String?
+  aspBand            String?
+  marginSensitivity  String?
+  customerCoverage   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model TechnologyNode {
+  id                String   @id @default(cuid())
+  companyId         String
+  name              String
+  summary           String
+  maturity          String
+  industryGap       String
+  costEffect        String
+  yieldEffect       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Capacity {
+  id               String   @id @default(cuid())
+  companyId        String
+  label            String
+  monthlyWaferK    Float?
+  utilizationRate  Float?
+  yieldRate        Float?
+  rampStage        String
+  summary          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model FabOrProductionLine {
+  id               String   @id @default(cuid())
+  companyId        String
+  name             String
+  location         String
+  processCapability String
+  equipmentSummary String
+  launchStage      String
+  summary          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model CustomerSegment {
+  id                 String   @id @default(cuid())
+  companyId          String
+  name               String
+  demandOutlook      String
+  priceSensitivity   String
+  certificationCycle String
+  switchingCost      String
+  summary            String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Supplier {
+  id                String   @id @default(cuid())
+  companyId         String
+  name              String
+  category          String
+  replaceability    String
+  deliveryCycle     String
+  geoRisk           String
+  technicalConstraint String
+  summary           String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model CapexProgram {
+  id              String   @id @default(cuid())
+  companyId       String
+  name            String
+  totalBudgetUsdB Float?
+  timeline        String
+  focusArea       String
+  capacityImpact  String
+  summary         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model PolicyConstraint {
+  id               String          @id @default(cuid())
+  companyId        String
+  name             String
+  impactDirection  ImpactDirection
+  severity         String
+  effectiveDate    DateTime?
+  durationLabel    String?
+  summary          String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  company          Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model MarketCycle {
+  id                String   @id @default(cuid())
+  companyId         String?
+  name              String
+  pricePosition     String
+  inventoryState    String
+  supplyDemandGap   String
+  competitorPace    String
+  summary           String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model DataSource {
+  id           String   @id @default(cuid())
+  companyId    String
+  name         String
+  sourceType   String
+  url          String
+  cadence      String
+  isActive     Boolean  @default(true)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id               String           @id @default(cuid())
+  companyId        String
+  title            String
+  sourceName       String
+  sourceUrl        String
+  rawText          String
+  extractedSummary String
+  eventType        EventType
+  impactDirection  ImpactDirection
+  impactStrength   Int
+  confidenceLevel  ConfidenceLevel
+  occurredAt       DateTime
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  company          Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  targets          EventTarget[]
+}
+
+model EventTarget {
+  id          String     @id @default(cuid())
+  eventId     String
+  companyId   String
+  entityType  EntityType
+  entityId    String?
+  label       String
+  changeNote  String
+  event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Relationship {
+  id                String     @id @default(cuid())
+  companyId         String
+  fromEntityType    EntityType
+  fromEntityId      String?
+  fromLabel         String
+  toEntityType      EntityType
+  toEntityId        String?
+  toLabel           String
+  strength          Int
+  summary           String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  company           Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model MetricSnapshot {
+  id           String   @id @default(cuid())
+  companyId    String
+  metricGroup  String
+  metricKey    String
+  metricLabel  String
+  metricValue  String
+  valueNumber  Float?
+  unit         String?
+  note         String?
+  asOfDate     DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model ValuationRun {
+  id               String         @id @default(cuid())
+  companyId        String
+  model            ValuationModel
+  headline         String
+  currentView      String
+  baseValue        Float
+  bearValue        Float
+  bullValue        Float
+  disagreement     String
+  topRisk          String
+  assumptionsJson  Json
+  driverSummary    String
+  latestEventIds   String[]
+  generatedAt      DateTime       @default(now())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  company          Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model AgentRun {
+  id                String          @id @default(cuid())
+  companyId         String
+  status            AgentRunStatus
+  sourceName        String
+  sourceUrl         String
+  rawInput          String
+  parsedPayload     Json
+  summary           String
+  errorMessage      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  company           Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  changes           AgentChange[]
+}
+
+model AgentChange {
+  id           String     @id @default(cuid())
+  agentRunId   String
+  companyId    String
+  entityType   EntityType
+  entityId     String?
+  fieldName    String
+  beforeValue  String?
+  afterValue   String?
+  sourceUrl    String
+  note         String
+  createdAt    DateTime   @default(now())
+  agentRun     AgentRun   @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+  company      Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
