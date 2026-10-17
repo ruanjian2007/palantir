@@ -1,0 +1,36 @@
+name: Security build
+on:
+  workflow_dispatch:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build
+      OPS_CONSOLE_SECRET: build-only-placeholder
+      OPS_CONSOLE_ACCESS_KEY: build-only-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install -g pnpm@9.14.2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm exec vitest run --maxWorkers=1 --minWorkers=1
+      - run: pnpm audit --prod
+      - run: pnpm build
+      - name: Package standalone runtime
+        run: |
+          cp -a .next/static .next/standalone/.next/static
+          if [ -d public ]; then cp -a public .next/standalone/public; fi
+          tar -czf onto-security-20261017.tar.gz -C .next/standalone .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: onto-linux-amd64
+          path: onto-security-20261017.tar.gz
+          retention-days: 14

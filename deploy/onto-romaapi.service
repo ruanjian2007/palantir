@@ -1,0 +1,30 @@
+[Unit]
+Description=Onto application (unprivileged standalone runtime)
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=onto
+Group=onto
+WorkingDirectory=/opt/onto/current
+EnvironmentFile=/etc/onto/onto.env
+Environment=NODE_ENV=production
+Environment=HOSTNAME=0.0.0.0
+Environment=PORT=3016
+ExecStart=/usr/local/bin/node /opt/onto/current/server.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/cache/onto
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

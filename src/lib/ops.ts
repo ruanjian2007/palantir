@@ -11,15 +11,15 @@ export function assertOpsSecret(secret: string) {
   }
 }
 
-export function assertOpsSession() {
-  const cookieValue = cookies().get(OPS_ACCESS_COOKIE)?.value;
+export async function assertOpsSession() {
+  const cookieValue = (await cookies()).get(OPS_ACCESS_COOKIE)?.value;
   if (cookieValue !== env.opsConsoleAccessKey) {
     notFound();
   }
 }
 
-export function assertOpsHeader() {
-  const headerValue = headers().get("x-ops-key");
+export async function assertOpsHeader() {
+  const headerValue = (await headers()).get("x-ops-key");
   if (headerValue !== env.opsConsoleAccessKey) {
     throw new Error("Unauthorized ops request");
   }

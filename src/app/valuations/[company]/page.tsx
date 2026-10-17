@@ -6,8 +6,9 @@ import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function ValuationPage({ params }: { params: { company: string } }) {
-  const company = await getCompanyPageData(params.company);
+export default async function ValuationPage({ params }: { params: Promise<{ company: string }> }) {
+  const resolvedParams = await params;
+  const company = await getCompanyPageData(resolvedParams.company);
   if (!company) notFound();
 
   const byModel = new Map<string, (typeof company.valuationRuns)[number][]>();

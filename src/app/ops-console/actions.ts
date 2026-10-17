@@ -14,7 +14,7 @@ function getString(formData: FormData, key: string) {
 export async function ingestAction(formData: FormData) {
   const secret = getString(formData, "secret");
   assertOpsSecret(secret);
-  assertOpsSession();
+  await assertOpsSession();
   await ingestAgentEvent({
     companySlug: getString(formData, "companySlug"),
     sourceName: getString(formData, "sourceName"),
@@ -31,7 +31,7 @@ export async function ingestAction(formData: FormData) {
 export async function recomputeAction(formData: FormData) {
   const secret = getString(formData, "secret");
   assertOpsSecret(secret);
-  assertOpsSession();
+  await assertOpsSession();
   const slug = getString(formData, "companySlug");
   await recomputeCompany(slug);
   revalidatePath("/");
@@ -42,7 +42,7 @@ export async function recomputeAction(formData: FormData) {
 export async function addDataSourceAction(formData: FormData) {
   const secret = getString(formData, "secret");
   assertOpsSecret(secret);
-  assertOpsSession();
+  await assertOpsSession();
   const slug = getString(formData, "companySlug");
   const company = await prisma.company.findUniqueOrThrow({ where: { slug } });
   await prisma.dataSource.create({
@@ -61,7 +61,7 @@ export async function addDataSourceAction(formData: FormData) {
 export async function addMetricSnapshotAction(formData: FormData) {
   const secret = getString(formData, "secret");
   assertOpsSecret(secret);
-  assertOpsSession();
+  await assertOpsSession();
   const slug = getString(formData, "companySlug");
   const company = await prisma.company.findUniqueOrThrow({ where: { slug } });
   await prisma.metricSnapshot.create({

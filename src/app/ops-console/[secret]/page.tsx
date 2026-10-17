@@ -8,10 +8,11 @@ import { ingestAction, recomputeAction, addDataSourceAction, addMetricSnapshotAc
 
 export const dynamic = "force-dynamic";
 
-export default async function OpsConsolePage({ params }: { params: { secret: string } }) {
+export default async function OpsConsolePage({ params }: { params: Promise<{ secret: string }> }) {
+  const resolvedParams = await params;
   try {
-    assertOpsSecret(params.secret);
-    assertOpsSession();
+    assertOpsSecret(resolvedParams.secret);
+    await assertOpsSession();
   } catch {
     notFound();
   }
@@ -24,14 +25,14 @@ export default async function OpsConsolePage({ params }: { params: { secret: str
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">公司对象：{companies.length} 家</div>
           <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">最近 Agent 运行：{runs.length} 次</div>
-          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">隐藏路径：/ops-console-{params.secret}</div>
+          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">隐藏路径：/ops-console-{resolvedParams.secret}</div>
         </div>
       </Panel>
 
       <section className="grid gap-6 xl:grid-cols-2">
         <Panel title="事件中心" subtitle="手动投喂原始文本，Agent 自动入库并触发估值重算">
           <form action={ingestAction} className="space-y-3">
-            <input type="hidden" name="secret" value={params.secret} />
+            <input type="hidden" name="secret" value={resolvedParams.secret} />
             <select name="companySlug" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
               {companies.map((company) => (
                 <option key={company.id} value={company.slug}>
@@ -51,7 +52,7 @@ export default async function OpsConsolePage({ params }: { params: { secret: str
           <div className="space-y-3">
             {companies.map((company) => (
               <form key={company.id} action={recomputeAction} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4">
-                <input type="hidden" name="secret" value={params.secret} />
+                <input type="hidden" name="secret" value={resolvedParams.secret} />
                 <input type="hidden" name="companySlug" value={company.slug} />
                 <div>
                   <div className="text-sm font-medium text-slate-950">{company.name}</div>
@@ -67,7 +68,7 @@ export default async function OpsConsolePage({ params }: { params: { secret: str
       <section className="grid gap-6 xl:grid-cols-2">
         <Panel title="数据源配置" subtitle="给某家公司增加跟踪来源">
           <form action={addDataSourceAction} className="space-y-3">
-            <input type="hidden" name="secret" value={params.secret} />
+            <input type="hidden" name="secret" value={resolvedParams.secret} />
             <select name="companySlug" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
               {companies.map((company) => (
                 <option key={company.id} value={company.slug}>
@@ -86,7 +87,7 @@ export default async function OpsConsolePage({ params }: { params: { secret: str
 
         <Panel title="状态维护" subtitle="直接补一条关键状态变量，立即进入公司页和估值层">
           <form action={addMetricSnapshotAction} className="space-y-3">
-            <input type="hidden" name="secret" value={params.secret} />
+            <input type="hidden" name="secret" value={resolvedParams.secret} />
             <select name="companySlug" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
               {companies.map((company) => (
                 <option key={company.id} value={company.slug}>

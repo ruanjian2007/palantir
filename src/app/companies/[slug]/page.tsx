@@ -16,8 +16,9 @@ function pickLatestMetrics(metrics: Array<{ metricKey: string; metricLabel: stri
   }).slice(0, 10);
 }
 
-export default async function CompanyPage({ params }: { params: { slug: string } }) {
-  const company = await getCompanyPageData(params.slug);
+export default async function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const company = await getCompanyPageData(resolvedParams.slug);
   if (!company) notFound();
 
   const latestMetrics = pickLatestMetrics(company.metricSnapshots);
