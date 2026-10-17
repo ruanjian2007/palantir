@@ -30,6 +30,9 @@ jobs:
         run: |
           cp -a .next/static .next/standalone/.next/static
           if [ -d public ]; then cp -a public .next/standalone/public; fi
+          engine=$(find .next/standalone -type f -name libquery_engine-debian-openssl-3.0.x.so.node -print -quit)
+          test -n "$engine"
+          ln -s "${engine#.next/standalone/}" .next/standalone/prisma-query-engine.so.node
           tar -czf onto-security-20261017.tar.gz -C .next/standalone .
       - uses: actions/upload-artifact@v4
         with:

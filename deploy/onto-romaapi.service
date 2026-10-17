@@ -11,6 +11,7 @@ EnvironmentFile=/etc/onto/onto.env
 Environment=NODE_ENV=production
 Environment=HOSTNAME=0.0.0.0
 Environment=PORT=3016
+Environment=PRISMA_QUERY_ENGINE_LIBRARY=/opt/onto/current/prisma-query-engine.so.node
 ExecStart=/usr/local/bin/node /opt/onto/current/server.js
 Restart=on-failure
 RestartSec=5
