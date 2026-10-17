@@ -1,5 +1,7 @@
 name: Security build
 on:
+  push:
+    branches: [feature/security-hardening-20261017]
   workflow_dispatch:
   pull_request:
 permissions:
